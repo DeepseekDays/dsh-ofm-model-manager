@@ -1,0 +1,66 @@
+{
+  "name": "dsh-ofm-model-manager",
+  "version": "2.0.0",
+  "description": "全体模型管理 — 管理 DSH 里所有提供商的模型：逐模型启用/停用 + 逐模型自定义显示名，停用的模型从「选择模型」列表里消失，自定义名直接换掉选择器里显示的名字；支持按提供商分组/折叠、搜索、状态与供应商筛选、组级与视图级批量操作；偏好持久化在 profile，改完立即生效（不用刷新页面、不用重启 DSH）。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "model",
+    "manager",
+    "catalog",
+    "toggle",
+    "rename",
+    "custom-name",
+    "our-free-model",
+    "ofm",
+    "provider",
+    "all-models"
+  ],
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "README.md",
+    "client.js",
+    "cordis.patch.yml",
+    "index.js",
+    "install.mjs",
+    "src",
+    "test"
+  ],
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": "*"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings-models",
+        "@deepseek-ai/dsh-client-ui-primitives"
+      ]
+    }
+  },
+  "scripts": {
+    "test": "node test/all.mjs",
+    "test:node": "node --test --test-isolation=none test/manager.test.mjs test/host.test.mjs test/client.test.mjs test/manifest.test.mjs"
+  }
+}

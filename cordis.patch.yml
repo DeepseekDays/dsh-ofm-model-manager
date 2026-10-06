@@ -1,0 +1,56 @@
+# ============================================================================
+# dsh-ofm-model-manager — DSH bundle patch（插件自带的挂载声明）
+# ============================================================================
+# 只做一件事：把插件本体插进 profile 的 loader 树。
+#
+#   · host 半端（index.js）：
+#       1) 包一层 ctx.llm.listModels()，把被停用的模型 id 从返回值里滤掉，
+#          并把带自定义名称的模型的 name 换成用户填的那个（浅拷贝，不动原对象）。
+#          DSH 的模型目录（buildModelCatalog）按 provider 分组，模型数为 0 的分组
+#          会被整组丢弃 —— 所以「停用最后一个模型」也会让分组消失，这正是需求里
+#          「仅已启用的模型显示在模型选择列表中」。
+#       2) 挂一条只读的 GET /api/ofm-model-manager/models，给浏览器半端提供
+#          **完整**清单（含名称、描述、路由/地区状态、启用状态）——被停用的模型
+#          在模型目录里已经看不见了，管理面板必须另有一条数据来源。
+#          支持 ?force=1 绕开清单缓存。
+#   · client 半端（client.js / exports["./client"]）：
+#       「设置 → 模型」页底部的管理面板（settings.models.footer 席位），
+#       读写走 ctx.remote.settings（原生 settings 服务）。
+#       （原先还注册过一个 settings.section 独立分页，与这块面板重复、
+#        又与 Our Free Model 自己那页挤在同一段导航里，2026-10-05 已删。）
+#
+# 两个 volatile 字段是用户偏好唯一的存放处（键的口径见 src/manager.js 文件头）：
+#   · disabled：['provider|modelId', ...]；裸 modelId 表示对**所有** provider 生效。
+#   · names   ：{'provider|modelId': '显示名'}；裸 modelId 同上。
+# 
+# 它们是 .volatile() 的，所以设置服务能写、改完热更新（loader 发
+# loader/volatile-update → 本插件广播 llm/adapters-updated → 浏览器模型目录当场
+# 重载），不用刷新页面、不用重启 DSH。用户点开关 / 填名字写入的值会落在
+# **profile 的 cordis.patch.yml**（profile 层永远最后应用），覆盖这里写的 [] / {}。
+# 想一键恢复「全部启用、全部默认名」，把 profile 里那条 id: dsh-ofm-model-manager
+# 的 config 删掉即可。
+#
+# `hidden` 是 v1 的字段（裸模型 id 数组），本版**只读保留**：
+#   · 用户升级前停用的模型靠它继续生效；
+#   · 每次写偏好时，通配键会镜像回它 —— 万一回退到 v1，旧版照样认得出自己那份设置。
+#
+# 本文件属于插件自己、不在 profile 目录里 —— 在设置界面点任何东西都不会被冲掉。
+# ============================================================================
+
+- insert:
+    - id: dsh-ofm-model-manager
+      # Node 可解析的包名 —— 必须与 package.json 的 name 一致
+      name: dsh-ofm-model-manager
+      config:
+        # 被停用（从模型选择列表里隐藏）的模型。开箱为空：全部启用。
+        # 键 = provider|modelId；不带竖线的裸 modelId 对所有 provider 生效。
+        # 例：['our-free-model|muse-spark-1.3-contributor-free', 'jev-1.13-free']
+        disabled: []
+        # 自定义显示名称：键同上，值是显示名。开箱为空：全部用系统默认名。
+        # 例：{'our-free-model|muse-spark-1.3-contributor-free': '星火'}
+        names: {}
+        # v1 的字段：裸模型 id 数组。本版只读（兼容旧设置），不主动写。
+        hidden: []
+        # 可选的收窄名单：留空 = 管**全部** provider（v2 的默认口径）。
+        # 填了就只显示这几条路由。
+        routes: []
