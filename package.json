@@ -1,7 +1,15 @@
 {
   "name": "dsh-ofm-model-manager",
   "version": "2.0.0",
-  "description": "全体模型管理 — 管理 DSH 里所有提供商的模型：逐模型启用/停用 + 逐模型自定义显示名，停用的模型从「选择模型」列表里消失，自定义名直接换掉选择器里显示的名字；支持按提供商分组/折叠、搜索、状态与供应商筛选、组级与视图级批量操作；偏好持久化在 profile，改完立即生效（不用刷新页面、不用重启 DSH）。",
+  "description": "Per-model enable/disable and renaming for every provider in DeepSeek Harness — disabled models disappear from the model picker, custom names replace the built-in ones. · DSH 全体模型管理：逐模型启用/停用与自定义显示名，支持按提供商分组、搜索、筛选与批量操作，改完立即生效（不用刷新页面、不用重启 DSH）。",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeepseekDays/dsh-ofm-model-manager.git"
+  },
+  "homepage": "https://github.com/DeepseekDays/dsh-ofm-model-manager#readme",
+  "bugs": {
+    "url": "https://github.com/DeepseekDays/dsh-ofm-model-manager/issues"
+  },
   "keywords": [
     "dsh",
     "dsh-plugin",
@@ -28,6 +36,8 @@
   },
   "files": [
     "README.md",
+    "README.zh.md",
+    "assets",
     "client.js",
     "cordis.patch.yml",
     "index.js",
